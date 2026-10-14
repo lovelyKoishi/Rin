@@ -13,6 +13,22 @@ describe("handleFetch", () => {
     getAppFetch.mockReset();
   });
 
+  it("redirects old CF-Blog article links on the current origin", async () => {
+    const { handleFetch } = await import("../fetch-handler");
+    for (const [oldPath, newPath] of [
+      ["/article/000003/vfio.html", "/vfio"],
+      ["/article/000004/me.html", "/me"],
+    ]) {
+      const response = await handleFetch(
+        new Request(`https://blog.3w3.asia${oldPath}?from=bookmark`),
+        {} as Env,
+      );
+      expect(response.status).toBe(301);
+      expect(response.headers.get("Location")).toBe(`https://blog.3w3.asia${newPath}?from=bookmark`);
+    }
+    expect(getAppFetch).toHaveBeenCalledTimes(0);
+  });
+
   it("serves static assets directly when the asset exists", async () => {
     getAppFetch.mockResolvedValue(new Response("app-body", { status: 200 }));
 
