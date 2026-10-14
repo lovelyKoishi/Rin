@@ -71,6 +71,16 @@ export async function handleFetch(
   const url = new URL(request.url);
   const pathname = url.pathname;
 
+  const legacyBlogPaths: Record<string, string> = {
+    "/article/000003/vfio.html": "/vfio",
+    "/article/000004/me.html": "/me",
+  };
+  const legacyDestination = legacyBlogPaths[pathname];
+  if (legacyDestination && (request.method === "GET" || request.method === "HEAD")) {
+    url.pathname = legacyDestination;
+    return Response.redirect(url.toString(), 301);
+  }
+
   if (isRootFeedRequest(pathname)) {
     return getApp().fetch(request, env, executionContext);
   }
