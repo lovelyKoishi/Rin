@@ -18,7 +18,7 @@ export function AppProviders({
     <ClientConfigContext.Provider value={config}>
       <ProfileContext.Provider value={profile}>
         <Helmet>
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" type="image/svg+xml" href="/fish.svg" />
         </Helmet>
         {children}
       </ProfileContext.Provider>
