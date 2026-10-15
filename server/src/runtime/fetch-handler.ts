@@ -71,6 +71,11 @@ export async function handleFetch(
   const url = new URL(request.url);
   const pathname = url.pathname;
 
+  if (url.protocol === "http:" && url.hostname === "blog.3w3.asia") {
+    url.protocol = "https:";
+    return Response.redirect(url.toString(), 308);
+  }
+
   const legacyBlogPaths: Record<string, string> = {
     "/article/000003/vfio.html": "/vfio",
     "/article/000004/me.html": "/me",
