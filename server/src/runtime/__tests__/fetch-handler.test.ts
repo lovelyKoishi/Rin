@@ -13,6 +13,21 @@ describe("handleFetch", () => {
     getAppFetch.mockReset();
   });
 
+  it("upgrades blog HTTP requests before assets and API while preserving paths and queries", async () => {
+    const { handleFetch } = await import("../fetch-handler");
+    const assetFetch = mock(async () => new Response("asset-body"));
+    for (const [path, method] of [["/", "GET"], ["/head.png?version=2", "HEAD"], ["/api/comment?article=1", "POST"]]) {
+      const response = await handleFetch(
+        new Request(`http://blog.3w3.asia${path}`, { method }),
+        { ASSETS: { fetch: assetFetch } } as unknown as Env,
+      );
+      expect(response.status).toBe(308);
+      expect(response.headers.get("Location")).toBe(`https://blog.3w3.asia${path}`);
+    }
+    expect(assetFetch).toHaveBeenCalledTimes(0);
+    expect(getAppFetch).toHaveBeenCalledTimes(0);
+  });
+
   it("redirects old CF-Blog article links on the current origin", async () => {
     const { handleFetch } = await import("../fetch-handler");
     for (const [oldPath, newPath] of [
