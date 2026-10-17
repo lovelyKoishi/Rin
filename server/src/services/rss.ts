@@ -42,6 +42,34 @@ function getConfiguredFrontendUrl(env: Env): string | null {
     return frontendUrl || null;
 }
 
+function resolveFeedUrl(value: string | undefined, baseUrl: string) {
+    if (!value) return undefined;
+    try {
+        const url = new URL(value, baseUrl);
+        return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : undefined;
+    } catch {
+        return undefined;
+    }
+}
+
+function absoluteContentUrls(baseUrl: string) {
+    return () => (tree: any) => {
+        function visit(node: any) {
+            if (node.type === 'element' && node.properties) {
+                for (const key of ['src', 'href', 'poster']) {
+                    const value = node.properties[key];
+                    if (typeof value === 'string') {
+                        const resolved = resolveFeedUrl(value, baseUrl);
+                        if (resolved) node.properties[key] = resolved;
+                    }
+                }
+            }
+            for (const child of node.children || []) visit(child);
+        }
+        visit(tree);
+    };
+}
+
 export function RSSService(): Hono {
     const app = new Hono();
 
@@ -235,6 +263,7 @@ async function generateFeed(env: Env, db: DB, frontendUrl: string, c?: AppContex
                     .use(remarkParse)
                     .use(remarkGfm)
                     .use(remarkRehype)
+                    .use(absoluteContentUrls(`${frontendUrl}/feed/${other.id}`))
                     .use(rehypeStringify)
                     .process(content);
                 contentHtml = file.toString();
@@ -256,7 +285,7 @@ async function generateFeed(env: Env, db: DB, frontendUrl: string, c?: AppContex
                     : content,
             content: contentHtml,
             author: user ? [{ name: user.username }] : undefined,
-            image: extractImage(content),
+            image: resolveFeedUrl(extractImage(content), `${frontendUrl}/feed/${other.id}`),
         });
     }
     
