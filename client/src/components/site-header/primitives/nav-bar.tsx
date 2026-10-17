@@ -21,6 +21,16 @@ export function NavBar({
       <NavItem menu={menu} onClick={onClick} itemClassName={itemClassName} title={t("hashtags")} selected={location === "/hashtags"} href="/hashtags" />
       <NavItem menu={menu} onClick={onClick} itemClassName={itemClassName} title={t("friends.title")} selected={location === "/friends"} href="/friends" />
       <NavItem menu={menu} onClick={onClick} itemClassName={itemClassName} title={t("about.title")} selected={location === "/about"} href="/about" />
+      <a
+        href="/rss.xml"
+        title="RSS"
+        aria-label="RSS"
+        onClick={onClick}
+        className={`${menu ? "" : "hidden"} md:block cursor-pointer text-orange-600 hover:text-orange-500 dark:text-orange-400 duration-300 px-2 py-4 md:p-4 text-sm ${itemClassName}`}
+      >
+        <i className="ri-rss-line mr-1" aria-hidden="true" />
+        RSS
+      </a>
     </>
   );
 }
