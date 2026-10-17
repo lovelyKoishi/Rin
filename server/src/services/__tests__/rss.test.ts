@@ -65,6 +65,23 @@ describe('RSSService', () => {
             expect(text).toContain('Test Feed 1');
         });
 
+        it('resolves relative images and article links for RSS readers', async () => {
+            sqlite.prepare('UPDATE feeds SET content = ? WHERE id = 2').run('![avatar](/head.png)\n\n[article](/feed/1)');
+            const res = await app.request('https://blog.3w3.asia/rss.xml', { method: 'GET' }, env);
+            const text = await res.text();
+            expect(res.status).toBe(200);
+            expect(text).toContain('url="https://blog.3w3.asia/head.png"');
+            expect(text).toContain('src="https://blog.3w3.asia/head.png"');
+            expect(text).toContain('href="https://blog.3w3.asia/feed/1"');
+        });
+
+        it('ignores invalid cover URLs without breaking the whole RSS feed', async () => {
+            sqlite.prepare('UPDATE feeds SET content = ? WHERE id = 2').run('![broken](https://[invalid/image.png)');
+            const res = await app.request('/rss.xml', { method: 'GET' }, env);
+            expect(res.status).toBe(200);
+            expect(await res.text()).toContain('Test Feed 2');
+        });
+
         it('should serve rss.json', async () => {
             const res = await app.request('/rss.json', { method: 'GET' }, env);
             
