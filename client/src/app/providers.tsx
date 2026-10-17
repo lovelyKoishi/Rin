@@ -19,6 +19,7 @@ export function AppProviders({
       <ProfileContext.Provider value={profile}>
         <Helmet>
           <link rel="icon" type="image/svg+xml" href="/fish.svg" />
+          <link rel="alternate" type="application/rss+xml" title="Wan blog RSS" href="/rss.xml" />
         </Helmet>
         {children}
       </ProfileContext.Provider>
